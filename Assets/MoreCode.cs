@@ -17,11 +17,14 @@ public class MoreCode : MonoBehaviour {
     public Material[] BlueWhales;
     public TextMesh[] TextWhales;
     public GameObject TheBlueWhale;
+    public GameObject SKIP;
     int MyWhale;
     int WhaleWhaleWhale;
     bool WhaliureCheck = false;
-    string[] GoodWhales = { "Largest animal\non earth", "Can't eat anything\nbigger than a\ngrapefruit", "Can hear up to\n1600km away", "Listed as\nendangered", "Can weigh up\nto 200 tons", "Tongue is as\n big as an\nelephant", "Largest heart\nin the world", "Sometimes\nattacked by\norcas" };
-    string[] BadWhales = { "2nd largest\nanimal on earth", "Can't eat anything\nbigger than a\ncantaloupe", "Can hear up to\n1600m away", "Listed as\nvulnerable", "Longest animal\non earth", "Largest living\nthing on earth", "Fastest thing in\nthe natural world", "Biggest dead\nbody in the\nworld", "Loudest marine\nanimal", "Biggest mouth" };
+    string[] True = { "Largest animal on earth", "Can't eat anything bigger than a grapefruit", "Can hear up to 1600km away", "Listed as endangered", "Can weigh up to 200 tons", "Tongue is as heavy as an elephant", "Largest heart in the world", "Sometimes attacked by orcas" };
+    string[] False = { "2nd largest animal on earth", "Can't eat anything bigger than a cantaloupe", "Can hear up to 1600m away", "Listed as vulnerable", "Longest animal on earth", "Largest living thing on earth", "Fastest thing in the natural world", "Biggest dead body in the world", "Loudest marine animal", "Biggest mouth" };
+    string[] GoodWhales = { "Largest animal\non earth", "Can't eat anything\nbigger than a\ngrapefruit", "Can hear up to\n1600km away", "Listed as\nendangered", "Can weigh up\nto 200 tons", "Tongue is as\nheavy as an\nelephant", "Largest heart\nin the world", "Sometimes\nattacked by\norcas" };
+    string[] BadWhales = { "2nd largest\nanimal on earth", "Can't eat anything\nbigger than a\ncantaloupe", "Can hear up to\n1600m away", "Listed as\nvulnerable", "Longest animal\non earth", "Largest living\nthing on earth", "Fastest thing in\nthe natural world", "Biggest dead\nbody in the\nworld", "Loudest marine animal", "Biggest mouth" };
     int[] WhalePositions = new int[4];
 
     static int moduleIdCounter = 1;
@@ -30,6 +33,7 @@ public class MoreCode : MonoBehaviour {
 
     void Awake () {
         moduleId = moduleIdCounter++;
+        SKIP.SetActive(false);
         for (byte i = 0; i < whales.Length; i++)
         {
             KMSelectable WhaleNumber = whales[i];
@@ -55,10 +59,15 @@ public class MoreCode : MonoBehaviour {
         for (int i = 0; i < 4; i++)
         {
             if (i == MyWhale)
+            {
                 TextWhales[i].text = GoodWhales[WhalePositions[i]];
+                Debug.LogFormat("[Blue Whale #{0}] Whale's button number {1} currently says '{2}'.", moduleId, i + 1, True[WhalePositions[i]]);
+            }
             else
+            {
                 TextWhales[i].text = BadWhales[WhalePositions[i]];
-            Debug.LogFormat("[Blue Whale #{0}] Whale's button number {1} takes position {2} in the list of potential statements.", moduleId, i + 1, WhalePositions[i] + 1);
+                Debug.LogFormat("[Blue Whale #{0}] Whale's button number {1} currently says '{2}'.", moduleId, i + 1, False[WhalePositions[i]]);
+            }
         }
         Debug.LogFormat("[Blue Whale #{0}] Knowing this, position {1} is the correct button to select.", moduleId, MyWhale + 1);
     }
@@ -67,12 +76,16 @@ public class MoreCode : MonoBehaviour {
         int whaley = Array.IndexOf(whales, WhaleNumber);
         whales[whaley].AddInteractionPunch();
         GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, WhaleNumber.transform);
-        if (!moduleSolved)
+        if (whaley == 4)
+        {
+            WhaleSounds.Stop();
+        }
+        else if (!moduleSolved)
         {
             if (whaley == MyWhale)
                 Debug.LogFormat("[Blue Whale #{0}] Whale is happy you know about him. Solved.", moduleId);
             else
-                Debug.LogFormat("[Blue Whale #{0}] Your choice of position {1} was incorrect, and Whale is sad. Why would you do that? Strike.", moduleId, whaley + 1);
+                Debug.LogFormat("[Blue Whale #{0}] Your choice of position {1} ({2}) was incorrect, and Whale is sad. Why would you do that? Strike.", moduleId, whaley + 1, False[WhalePositions[whaley]]);
             if (whaley == MyWhale)
             {
                 StartCoroutine(WhaleSolve());
@@ -96,12 +109,14 @@ public class MoreCode : MonoBehaviour {
         TextWhales[3].text = "IT";
         Module.HandlePass();
         TheBlueWhale.GetComponent<MeshRenderer>().material = BlueWhales[10];
+        SKIP.SetActive(true);
         while (WhaleSounds.isPlaying)
             yield return new WaitForSeconds(0.01f);
         TheBlueWhale.GetComponent<MeshRenderer>().material = BlueWhales[UnityEngine.Random.Range(0, 10)];
+        SKIP.SetActive(false);
     }
 
-    /*/tp
+    /*/ i am bad at tp support apparently but whatevs I guess
     #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"!{0} answer [1-4] (Selects the specified answer in reading order)";
     #pragma warning restore 414
