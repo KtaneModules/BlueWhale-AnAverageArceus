@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using KModkit;
 
 public class MoreCode : MonoBehaviour {
 
@@ -20,7 +17,7 @@ public class MoreCode : MonoBehaviour {
     public GameObject SKIP;
     int MyWhale;
     int WhaleWhaleWhale;
-    bool WhaliureCheck = false;
+    bool WhaleTrulySolved = false;
     string[] True = { "Largest animal on earth", "Can't eat anything bigger than a grapefruit", "Can hear up to 1600km away", "Listed as endangered", "Can weigh up to 200 tons", "Tongue is as heavy as an elephant", "Largest heart in the world", "Sometimes attacked by orcas" };
     string[] False = { "2nd largest animal on earth", "Can't eat anything bigger than a cantaloupe", "Can hear up to 1600m away", "Listed as vulnerable", "Longest animal on earth", "Largest living thing on earth", "Fastest thing in the natural world", "Biggest dead body in the world", "Loudest marine animal", "Biggest mouth" };
     string[] GoodWhales = { "Largest animal\non earth", "Can't eat anything\nbigger than a\ngrapefruit", "Can hear up to\n1600km away", "Listed as\nendangered", "Can weigh up\nto 200 tons", "Tongue is as\nheavy as an\nelephant", "Largest heart\nin the world", "Sometimes\nattacked by\norcas" };
@@ -56,6 +53,7 @@ public class MoreCode : MonoBehaviour {
                 else
                     WhalePositions[i] = UnityEngine.Random.Range(0, BadWhales.Length);
         }
+        Debug.LogFormat("[Blue Whale #{0}] Whale's buttons are numbered from top to bottom then left to right.", moduleId);
         for (int i = 0; i < 4; i++)
         {
             if (i == MyWhale)
@@ -75,8 +73,8 @@ public class MoreCode : MonoBehaviour {
     void WhalePress (KMSelectable WhaleNumber) {
         int whaley = Array.IndexOf(whales, WhaleNumber);
         whales[whaley].AddInteractionPunch();
-        GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, WhaleNumber.transform);
-        if (whaley == 4)
+        Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, WhaleNumber.transform);
+        if (whaley == 4 && WhaleTrulySolved)
         {
             WhaleSounds.Stop();
         }
@@ -108,6 +106,7 @@ public class MoreCode : MonoBehaviour {
         TextWhales[2].text = "DONE";
         TextWhales[3].text = "IT";
         Module.HandlePass();
+        WhaleTrulySolved = true;
         TheBlueWhale.GetComponent<MeshRenderer>().material = BlueWhales[10];
         SKIP.SetActive(true);
         while (WhaleSounds.isPlaying)
@@ -116,7 +115,6 @@ public class MoreCode : MonoBehaviour {
         SKIP.SetActive(false);
     }
 
-    /*/ i am bad at tp support apparently but whatevs I guess
     #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"!{0} answer [1-4] (Selects the specified answer in reading order)";
     #pragma warning restore 414
@@ -124,45 +122,32 @@ public class MoreCode : MonoBehaviour {
         string[] WhalePlays = command.Split(' ');
         if (Regex.IsMatch(WhalePlays[0], @"^\s*answer\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
         {
-            try
-            {
-                int TemporaryWhale = Int32.Parse(WhalePlays[1]);
-                WhaleWhaleWhale = TemporaryWhale;
-            }
-            catch (FormatException)
-            {
-                WhaliureCheck = true;
-            }
-            if (WhaliureCheck)
+            if (!int.TryParse(WhalePlays[1], out WhaleWhaleWhale))
             {
                 yield return "sendtochaterror Command format is not correct. Please fix this.";
-                WhaliureCheck = false;
                 yield break;
             }
-            else if (WhaleWhaleWhale > 4)
+            if (WhaleWhaleWhale > 4)
             {
                 yield return "sendtochaterror There are only four buttons, you can't press that.";
                 yield break;
             }
-            else if (WhaleWhaleWhale < 1)
+            if (WhaleWhaleWhale < 1)
             {
                 yield return "sendtochaterror Too low. Try again.";
                 yield break;
             }
-            else {
             yield return null;
-                if (MyWhale == WhaleWhaleWhale - 1)
-                    yield return "solve";
-                else
-                    yield return "strike";
-            whales[WhaleWhaleWhale - 1].OnInteract();
-            }
+            int[] ReorderedWhale = { 0, 2, 1, 3 };
+            if (MyWhale == ReorderedWhale[WhaleWhaleWhale - 1])
+                yield return "solve";
+            whales[ReorderedWhale[WhaleWhaleWhale - 1]].OnInteract();
         }
     }
 
     IEnumerator TwitchHandleForcedSolve () {
-        yield return new WaitForSeconds(0.1f);
+        yield return null;
         whales[MyWhale].OnInteract();
+        while (!WhaleTrulySolved) yield return true;
     }
-    /*/
 }
